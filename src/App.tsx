@@ -3,13 +3,15 @@ import './App.css'
 
 function App() {
     const [isProcessing, setIsProcessing] = useState(false);
-    const dataIn = useRef(null);
-    const dataOut = useRef(null);
+    const dataIn = useRef<HTMLTextAreaElement>(null);
+    const dataOut = useRef<HTMLTextAreaElement>(null);
 
     function transform() {
         setIsProcessing(true);
 
-        dataOut.current.value = dataIn.current.value;
+        if (dataOut.current !== null) {
+            dataOut.current.value = dataIn.current?.value ?? '';
+        }
 
         setIsProcessing(false);
     }
