@@ -16,3 +16,13 @@ button {
   margin-top: 1rem;
   min-width: 150px;
 }
+
+section.options {
+  display: flex;
+  justify-content: center;
+  margin: .7rem 0;
+
+  label:not(:last-child) {
+    margin-right: .5rem;
+  }
+}
