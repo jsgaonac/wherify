@@ -19,6 +19,7 @@ button {
 
 section.options {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   margin: .7rem 0;
 
