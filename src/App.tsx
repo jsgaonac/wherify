@@ -1,4 +1,4 @@
-import {useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import './App.css'
 import Header from './components/Header/Header';
 import Toolbar from './components/Toolbar/Toolbar';
@@ -12,6 +12,16 @@ function App() {
     const [isSingleQuotes, setIsSingleQuotes] = useState(true);
     const [isDoubleQuotes, setIsDoubleQuotes] = useState(false);
 
+    // store and retrieve data dataIn in localstorage
+
+    useEffect(() => {
+        if (localStorage.getItem('dataIn')) {
+            if (dataIn.current !== null) {
+                dataIn.current.value = localStorage.getItem('dataIn')!;
+            }
+        }
+    }, []);
+
     function transform() {
         setIsProcessing(true);
 
@@ -24,7 +34,7 @@ function App() {
                 surroundingChar = '"';
             }
 
-            const words = (dataIn.current?.value?.trim()?.split(/\s+/) || []).filter(w => w != ',');
+            const words = (dataIn.current?.value?.trim()?.split(/\s+/) || []).filter(w => w !== ',');
             let processedWords = words.map(w => `${surroundingChar}${w}${surroundingChar}`).join('\n,');
 
             if (isAddParenthesis) {
@@ -47,6 +57,7 @@ function App() {
                 <div className="content-areas">
                     <textarea name="data-in" id="data-in" rows={20}
                               placeholder="Paste your data here..."
+                              onChange={(e) => localStorage.setItem('dataIn', e.currentTarget.value)}
                               ref={dataIn}></textarea>
                     <textarea name="data-out" id="data-out" rows={20}
                               placeholder="Output goes here..."
