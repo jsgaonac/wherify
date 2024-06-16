@@ -1,5 +1,7 @@
 import {useRef, useState} from 'react';
 import './App.css'
+import Header from './components/Header/Header';
+import Toolbar from './components/Toolbar/Toolbar';
 
 function App() {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -38,8 +40,8 @@ function App() {
     }
 
     return (
-        <>
-            <h1>Wherify</h1>
+        <div>
+            <Header />
 
             <section className="content">
                 <div className="content-areas">
@@ -51,41 +53,17 @@ function App() {
                               ref={dataOut}></textarea>
                 </div>
 
-                <section className="options">
-                    <label htmlFor="add-par">Use single-quotes
-                        <input type="checkbox" checked={isSingleQuotes} onChange={(e) => {
-                            setIsSingleQuotes(e.target.checked);
-                            setIsDoubleQuotes(false);
-                        }}/>
-                    </label>
-
-                    <label htmlFor="add-par">Use double-quotes
-                        <input type="checkbox" checked={isDoubleQuotes} onChange={(e) => {
-                            setIsSingleQuotes(false);
-                            setIsDoubleQuotes(e.target.checked);
-                        }}/>
-                    </label>
-
-                    <label htmlFor="add-par">Add parenthesis
-                        <input type="checkbox" checked={isAddParenthesis} onChange={(e) => {
-                            setIsAddParenthesis(e.target.checked);
-                            setIsAddBrackets(false);
-                        }}/>
-                    </label>
-
-                    <label htmlFor="add-par">Add brackets
-                        <input type="checkbox" checked={isAddBrackets} onChange={(e) => {
-                            setIsAddBrackets(e.target.checked);
-                            setIsAddParenthesis(false);
-                        }}/>
-                    </label>
-                </section>
+                <Toolbar onSingleQuotesChanged={(isSingleQuotes: boolean) => setIsSingleQuotes(isSingleQuotes)}
+                        onDoubleQuotesChanged={(isDoubleQuotes: boolean) => setIsDoubleQuotes(isDoubleQuotes)}
+                        onAddParenthesisChanged={(isAddParenthesis: boolean) => setIsAddParenthesis(isAddParenthesis)}
+                        onAddBracketsChanged={(isAddBrackets: boolean) => setIsAddBrackets(isAddBrackets)}
+                    />
 
                 <button id="transform-btn" onClick={transform} disabled={isProcessing}>
                     {isProcessing ? "Working on it..." : "Transform"}
                 </button>
             </section>
-        </>
+        </div>
     )
 }
 
