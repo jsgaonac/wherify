@@ -27,3 +27,12 @@ section.options {
     margin-right: .5rem;
   }
 }
+
+.action-group {
+  display: flex;
+  justify-content: center;
+}
+
+.action-group > button:not(:first-child) {
+  margin-left: .5rem;
+}

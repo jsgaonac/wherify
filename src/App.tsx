@@ -49,6 +49,10 @@ function App() {
         setIsProcessing(false);
     }
 
+    function copyToClipboard() {
+        void navigator.clipboard.writeText(dataOut?.current?.value ?? '');
+    }
+
     return (
         <div>
             <Header />
@@ -70,9 +74,13 @@ function App() {
                         onAddBracketsChanged={(isAddBrackets: boolean) => setIsAddBrackets(isAddBrackets)}
                     />
 
-                <button id="transform-btn" onClick={transform} disabled={isProcessing}>
-                    {isProcessing ? "Working on it..." : "Transform"}
-                </button>
+                <div className="action-group">
+                    <button id="transform-btn" onClick={transform} disabled={isProcessing}>
+                        {isProcessing ? "Working on it..." : "Transform"}
+                    </button>
+
+                    <button title="Copy to clipboard" onClick={copyToClipboard}>Copy</button>
+                </div>
             </section>
         </div>
     )
