@@ -7,6 +7,7 @@ function App() {
     const [isProcessing, setIsProcessing] = useState(false);
     const dataIn = useRef<HTMLTextAreaElement>(null);
     const dataOut = useRef<HTMLTextAreaElement>(null);
+    const popover = useRef<HTMLDivElement>(null);
     const [isAddParenthesis, setIsAddParenthesis] = useState(true);
     const [isAddBrackets, setIsAddBrackets] = useState(false);
     const [isSingleQuotes, setIsSingleQuotes] = useState(true);
@@ -50,6 +51,14 @@ function App() {
     }
 
     function copyToClipboard() {
+        if (popover.current)
+            popover.current.className = `${popover.current.className} visible`;
+
+        setTimeout(() => {
+            if (popover.current)
+                popover.current.className = popover.current.className.replace('visible', '');
+        }, 3000);
+
         void navigator.clipboard.writeText(dataOut?.current?.value ?? '');
     }
 
@@ -79,7 +88,10 @@ function App() {
                         {isProcessing ? "Working on it..." : "Transform"}
                     </button>
 
-                    <button title="Copy to clipboard" onClick={copyToClipboard}>Copy</button>
+                    <div className="button-wrapper">
+                        <button title="Copy to clipboard" onClick={copyToClipboard}>Copy</button>
+                        <div id="copied-popover" className="copied-popover" ref={popover}>Copied</div>
+                    </div>
                 </div>
             </section>
         </div>
