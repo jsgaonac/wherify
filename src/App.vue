@@ -2,6 +2,10 @@
 
 import {computed, ref} from 'vue';
 
+const inputDataValue = ref('');
+const outputDataValue = ref('');
+
+const duplicateChecked = ref(true);
 const currentSeparator = ref('single');
 const currentClosure = ref('parens');
 
@@ -15,6 +19,10 @@ const isDoubleQuoteChecked = computed(() => {
 
 const isParenthesisClosureChecked = computed(() => currentClosure.value === 'parens');
 const isSquareBracketsClosureChecked = computed(() => currentClosure.value === 'square');
+
+function onDuplicateChange(event: Event) {
+  duplicateChecked.value = (event.target as HTMLInputElement).checked;
+}
 
 function onSeparatorChange(type: string) {
   if (type === currentSeparator.value) {
@@ -36,6 +44,42 @@ function onClosureChange(type: string) {
   currentClosure.value = type;
 }
 
+function removeDuplicates(words: string[]) {
+  const wordCount: {[k: string]: number} = {};
+  const uniqueWords: string[] = [];
+
+  for (const word of words) {
+    if (!wordCount[word]) {
+      wordCount[word] = 1;
+      uniqueWords.push(word);
+    }
+  }
+
+  return uniqueWords;
+}
+
+function doTransform() {
+  if (!inputDataValue.value) return;
+
+  let words = (inputDataValue.value ?? '')
+      .trim()
+      .split(/\s+/)
+      .filter(a => a !== ',');
+
+  if (duplicateChecked.value) {
+    words = removeDuplicates(words);
+  }
+
+  const surroundingChar = isSingleQuoteChecked.value ? "'" : (
+      isDoubleQuoteChecked.value ? '"' : ''
+  );
+
+  const transformedWords = words.map(a => `  ${surroundingChar}${a}${surroundingChar}`)
+      .join(',\n');
+
+  outputDataValue.value = isParenthesisClosureChecked.value ? `(\n${transformedWords}\n)` : `[\n${transformedWords}\n]`;
+}
+
 </script>
 
 <template>
@@ -45,11 +89,20 @@ function onClosureChange(type: string) {
 
   <main>
     <section class="data">
-      <textarea rows="20" class="input-data" placeholder="Paste your data here."></textarea>
-      <textarea rows="20" class="output-data" placeholder="Output goes here."></textarea>
+      <textarea rows="20" class="input-data" v-model="inputDataValue" placeholder="Paste your data here."></textarea>
+      <textarea rows="20" class="output-data" :value="outputDataValue" placeholder="Output goes here."></textarea>
     </section>
 
     <section class="options">
+      <div class="option">
+        <h2>Data</h2>
+        <div class="values">
+          <label for="remove-duplicates">
+            <input type="checkbox" name="remove-duplicates" id="remove-duplicates" :checked="duplicateChecked" @change="onDuplicateChange">
+            Remove duplicates
+          </label>
+        </div>
+      </div>
       <div class="option">
         <h2>Separator</h2>
         <div class="values">
@@ -79,7 +132,7 @@ function onClosureChange(type: string) {
     </section>
 
     <section class="actions">
-      <button>Transform</button>
+      <button @click="doTransform">Transform</button>
       <button>Copy output</button>
     </section>
   </main>
