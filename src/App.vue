@@ -1,6 +1,10 @@
 <script setup lang="ts">
 
 import {computed, ref} from 'vue';
+import {useClipboard} from '@vueuse/core';
+
+const {copy} = useClipboard();
+const showCopied = ref(false);
 
 const inputDataValue = ref('');
 const outputDataValue = ref('');
@@ -80,6 +84,18 @@ function doTransform() {
   outputDataValue.value = isParenthesisClosureChecked.value ? `(\n${transformedWords}\n)` : `[\n${transformedWords}\n]`;
 }
 
+function doCopy(data: string) {
+  copy(data);
+
+  if (showCopied.value) return;
+
+  showCopied.value = true;
+
+  setTimeout(() => {
+    showCopied.value = false;
+  }, 5000);
+}
+
 </script>
 
 <template>
@@ -133,7 +149,10 @@ function doTransform() {
 
     <section class="actions">
       <button @click="doTransform">Transform</button>
-      <button>Copy output</button>
+      <div class="copied-wrapper">
+        <button @click="doCopy(outputDataValue)">Copy output</button>
+        <span :class="{ show: showCopied, copied: true }">Copied</span>
+      </div>
     </section>
   </main>
 </template>
@@ -185,7 +204,25 @@ section.actions {
   margin-top: 1rem;
 }
 
-.actions > button:not(:first-child) {
+.actions > *:not(:first-child) {
   margin-left: 1rem;
+}
+
+.copied-wrapper {
+  position: relative;
+}
+
+.copied {
+  color: palevioletred;
+  font-weight: bold;
+  margin-left: 1rem;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transition: opacity 0.5s;
+}
+
+.copied.show {
+  opacity: 1;
 }
 </style>
