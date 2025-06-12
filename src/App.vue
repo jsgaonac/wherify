@@ -10,15 +10,17 @@ const inputDataValue = ref('');
 const outputDataValue = ref('');
 
 const duplicateChecked = ref(true);
-const currentSeparator = ref('single');
+const currentWrapWith = ref('single');
 const currentClosure = ref('parens');
+const isSpaceSplitChecked = ref(true);
+const isNewlineSplitChecked = ref(false);
 
 const isSingleQuoteChecked = computed(() => {
-  return currentSeparator.value === 'single';
+  return currentWrapWith.value === 'single';
 });
 
 const isDoubleQuoteChecked = computed(() => {
-  return currentSeparator.value === 'double';
+  return currentWrapWith.value === 'double';
 });
 
 const isParenthesisClosureChecked = computed(() => currentClosure.value === 'parens');
@@ -28,14 +30,14 @@ function onDuplicateChange(event: Event) {
   duplicateChecked.value = (event.target as HTMLInputElement).checked;
 }
 
-function onSeparatorChange(type: string) {
-  if (type === currentSeparator.value) {
-    currentSeparator.value = '';
+function onWrapWithChange(type: string) {
+  if (type === currentWrapWith.value) {
+    currentWrapWith.value = '';
 
     return;
   }
 
-  currentSeparator.value = type;
+  currentWrapWith.value = type;
 }
 
 function onClosureChange(type: string) {
@@ -46,6 +48,11 @@ function onClosureChange(type: string) {
   }
 
   currentClosure.value = type;
+}
+
+function onSplitChange(type: 'space' | 'newline') {
+  isSpaceSplitChecked.value = type === 'space';
+  isNewlineSplitChecked.value = type === 'newline';
 }
 
 function removeDuplicates(words: string[]) {
@@ -67,7 +74,7 @@ function doTransform() {
 
   let words = (inputDataValue.value ?? '')
       .trim()
-      .split(/\s+/)
+      .split(isSpaceSplitChecked.value ? /\s+/ : /\n+/)
       .filter(a => a !== ',');
 
   if (duplicateChecked.value) {
@@ -111,6 +118,19 @@ function doCopy(data: string) {
 
     <section class="options">
       <div class="option">
+        <h2>Split on</h2>
+        <div class="values">
+          <label for="split-space">
+            <input type="checkbox" name="split-space" id="split-space" v-model="isSpaceSplitChecked" @change="onSplitChange('space')">
+            Space
+          </label>
+          <label for="split-newline">
+            <input type="checkbox" name="split-newline" id="split-newline" v-model="isNewlineSplitChecked" @change="onSplitChange('newline')">
+            Newline
+          </label>
+        </div>
+      </div>
+      <div class="option">
         <h2>Data</h2>
         <div class="values">
           <label for="remove-duplicates">
@@ -120,14 +140,14 @@ function doCopy(data: string) {
         </div>
       </div>
       <div class="option">
-        <h2>Separator</h2>
+        <h2>Wrap with</h2>
         <div class="values">
           <label for="single-quote">
-            <input type="checkbox" name="single-quote" id="single-quote" :checked="isSingleQuoteChecked" @change="onSeparatorChange('single')">
+            <input type="checkbox" name="single-quote" id="single-quote" :checked="isSingleQuoteChecked" @change="onWrapWithChange('single')">
             Single quote ('')
           </label>
           <label for="double-quote">
-            <input type="checkbox" name="double-quote" id="double-quote" :checked="isDoubleQuoteChecked" @change="onSeparatorChange('double')">
+            <input type="checkbox" name="double-quote" id="double-quote" :checked="isDoubleQuoteChecked" @change="onWrapWithChange('double')">
             Double quote ("")
           </label>
         </div>
