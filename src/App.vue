@@ -14,6 +14,7 @@ const currentWrapWith = ref('single');
 const currentClosure = ref('parens');
 const isSpaceSplitChecked = ref(true);
 const isNewlineSplitChecked = ref(false);
+const isWrapInLineSplitChecked = ref(false);
 
 const isSingleQuoteChecked = computed(() => {
   return currentWrapWith.value === 'single';
@@ -50,9 +51,10 @@ function onClosureChange(type: string) {
   currentClosure.value = type;
 }
 
-function onSplitChange(type: 'space' | 'newline') {
+function onSplitChange(type: 'space' | 'newline' | 'wrap-in-line') {
   isSpaceSplitChecked.value = type === 'space';
   isNewlineSplitChecked.value = type === 'newline';
+  isWrapInLineSplitChecked.value = type === 'wrap-in-line';
 }
 
 function removeDuplicates(words: string[]) {
@@ -74,7 +76,7 @@ function doTransform() {
 
   let words = (inputDataValue.value ?? '')
       .trim()
-      .split(isSpaceSplitChecked.value ? /\s+/ : /\n+/)
+      .split(isSpaceSplitChecked.value ? /\s+/ : /\n+/) // Split on a newline works for both nweline and wrap-in-line
       .filter(a => a !== ',');
 
   if (duplicateChecked.value) {
@@ -85,10 +87,20 @@ function doTransform() {
       isDoubleQuoteChecked.value ? '"' : ''
   );
 
-  const transformedWords = words.map(a => `  ${surroundingChar}${a}${surroundingChar}`)
-      .join(',\n');
+  let transformedWords: string;
+  const openWrapper = isParenthesisClosureChecked.value ? '(' : '[';
+  const closeWrapper = isParenthesisClosureChecked.value ? ')' : ']';
 
-  outputDataValue.value = isParenthesisClosureChecked.value ? `(\n${transformedWords}\n)` : `[\n${transformedWords}\n]`;
+  if (isWrapInLineSplitChecked.value) {
+    transformedWords = transformWrapInLine(words, surroundingChar, openWrapper, closeWrapper);
+  } else {
+    transformedWords = words.map(a => `  ${surroundingChar}${a}${surroundingChar}`)
+        .join(',\n');
+
+    transformedWords = `${openWrapper}\n${transformedWords}\n${closeWrapper}`;
+  }
+
+  outputDataValue.value = transformedWords;
 }
 
 function doCopy(data: string) {
@@ -101,6 +113,18 @@ function doCopy(data: string) {
   setTimeout(() => {
     showCopied.value = false;
   }, 5000);
+}
+
+function transformWrapInLine(words: string[], surroundingChar: string, openWrapper: string, closeWrapper: string): string {
+  const linesOfWords =  words.map(a => a.split(/\s+/));
+
+  const transformedLines: string[] = [];
+
+  for (const l of linesOfWords) {
+    transformedLines.push(`${openWrapper}${l.map(a => `${surroundingChar}${a}${surroundingChar}`).join(', ')}${closeWrapper}`);
+  }
+
+  return transformedLines.join(',\n');
 }
 
 </script>
@@ -127,6 +151,10 @@ function doCopy(data: string) {
           <label for="split-newline">
             <input type="checkbox" name="split-newline" id="split-newline" v-model="isNewlineSplitChecked" @change="onSplitChange('newline')">
             Newline
+          </label>
+          <label for="split-wrap-line">
+            <input type="checkbox" name="split-wrap-line" id="split-wrap-line" v-model="isWrapInLineSplitChecked" @change="onSplitChange('wrap-in-line')">
+            Wrap-in-line
           </label>
         </div>
       </div>
