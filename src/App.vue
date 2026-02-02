@@ -15,6 +15,8 @@ const currentClosure = ref('parens');
 const isSpaceSplitChecked = ref(true);
 const isNewlineSplitChecked = ref(false);
 const isWrapInLineSplitChecked = ref(false);
+const isWrapInLineParseChecked = ref(true);
+const isWrapInLineNoParsingChecked = ref(false);
 
 const isSingleQuoteChecked = computed(() => {
   return currentWrapWith.value === 'single';
@@ -55,6 +57,11 @@ function onSplitChange(type: 'space' | 'newline' | 'wrap-in-line') {
   isSpaceSplitChecked.value = type === 'space';
   isNewlineSplitChecked.value = type === 'newline';
   isWrapInLineSplitChecked.value = type === 'wrap-in-line';
+}
+
+function onParseChange(event: 'parse' | 'no-parse') {
+  isWrapInLineParseChecked.value = event === 'parse';
+  isWrapInLineNoParsingChecked.value = event === 'no-parse';
 }
 
 function removeDuplicates(words: string[]) {
@@ -121,7 +128,23 @@ function transformWrapInLine(words: string[], surroundingChar: string, openWrapp
   const transformedLines: string[] = [];
 
   for (const l of linesOfWords) {
-    transformedLines.push(`${openWrapper}${l.map(a => `${surroundingChar}${a}${surroundingChar}`).join(', ')}${closeWrapper}`);
+    transformedLines.push(`${openWrapper}${l.map(a => {
+      let parseSuccess = false;
+
+      if (isWrapInLineParseChecked.value) {
+        let parsed = parseInt(a, 10);
+
+        if (!isNaN(parsed)) {
+          parseSuccess = true;
+        } else {
+          parsed = parseFloat(a);
+
+          parseSuccess = !isNaN(parsed);
+        }
+      }
+
+      return parseSuccess ? a : `${surroundingChar}${a}${surroundingChar}`;
+    }).join(', ')}${closeWrapper}`);
   }
 
   return transformedLines.join(',\n');
@@ -155,6 +178,19 @@ function transformWrapInLine(words: string[], surroundingChar: string, openWrapp
           <label for="split-wrap-line">
             <input type="checkbox" name="split-wrap-line" id="split-wrap-line" v-model="isWrapInLineSplitChecked" @change="onSplitChange('wrap-in-line')">
             Wrap-in-line
+          </label>
+        </div>
+      </div>
+      <div class="option" v-if="isWrapInLineSplitChecked">
+        <h2>Wrap-in-line options</h2>
+        <div class="values">
+          <label for="wrap-in-line-parsing">
+            <input type="checkbox" name="wrap-in-line-parsing" id="wrap-in-line-parsing" v-model="isWrapInLineParseChecked" @change="onParseChange('parse')">
+            Parse
+          </label>
+          <label for="wrap-in-line-no-parsing">
+            <input type="checkbox" name="wrap-in-line-no-parsing" id="wrap-in-line-no-parsing" v-model="isWrapInLineNoParsingChecked" @change="onParseChange('no-parse')">
+            All strings
           </label>
         </div>
       </div>
